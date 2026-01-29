@@ -26,8 +26,21 @@ class UserProfile(Base):
     age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     status: Mapped[StatusChoices] = mapped_column(Enum(StatusChoices), default=StatusChoices.simple)
     date_registered: Mapped[date] = mapped_column(Date,default=datetime.today)
-    reviews: Mapped[List["Review"]] = relationship( "Review", back_populates="user",
+    user_reviews: Mapped[List["Review"]] = relationship(  back_populates="user_reviews",
                                                     cascade="all, delete-orphan")
+    token_user: Mapped[List["RefreshToken"]] = relationship( back_populates="token_user",
+                                                    cascade="all, delete-orphan")
+
+
+class RefreshToken(Base):
+    __tablename__ = 'refresh_token'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    token_user: Mapped[UserProfile] = relationship(UserProfile,back_populates='token_user',
+                                                   cascade="all, delete-orphan")
+    token: Mapped[str] = mapped_column(String)
+    created_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
 class Category(Base):
@@ -36,7 +49,7 @@ class Category(Base):
     id: Mapped[int] = mapped_column(Integer,primary_key=True, autoincrement=True)
     category_image: Mapped[str] = mapped_column(String)
     category_name: Mapped[str] = mapped_column(String(20), unique=True)
-    subcategories: Mapped[List["SubCategory"]] = relationship('SubCategory', back_populates='category',
+    subcategories: Mapped[List["SubCategory"]] = relationship( back_populates='category',
                                                               cascade='all, delete-orphan')
 
 
@@ -46,7 +59,7 @@ class SubCategory(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     sub_category_name: Mapped[str] = mapped_column(String(50))
     category_id: Mapped[int] = mapped_column(ForeignKey('category.id'))
-    category: Mapped[Category] = relationship(Category,back_populates='subcategories')
+    category: Mapped[Category] = relationship(back_populates='subcategories')
     products: Mapped[List["Product"]] = relationship("Product",
                                                      cascade="all, delete-orphan")
 
@@ -84,7 +97,7 @@ class Review(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    user: Mapped[UserProfile] = relationship(UserProfile, back_populates="reviews")
+    user: Mapped[UserProfile] = relationship(UserProfile, back_populates="user_reviews")
     product_id: Mapped[int] = mapped_column(ForeignKey('product.id'))
     product_class: Mapped[Product] = relationship(Product, back_populates ="product_reviews")
     comment: Mapped[str] = mapped_column(Text)

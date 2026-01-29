@@ -1,6 +1,6 @@
 from .db import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, Enum, Date,ForeignKey,Text
+from sqlalchemy import Integer, String, Enum, Date,ForeignKey,Text, DateTime
 from typing import Optional, List
 from enum import Enum as PyEnum
 from datetime import date
@@ -39,6 +39,22 @@ class UserProfile(Base):
                                                     cascade="all, delete-orphan")
     reviews: Mapped[List["Review"]] = relationship("Review", back_populates="user",
                                                    cascade="all, delete-orphan")
+    token_user: Mapped[List["RefreshToken"]] = relationship(back_populates="token_user",
+                                                            cascade="all, delete-orphan")
+
+
+    def __str__(self):
+        return f'{self.first_name},{self.last_name}'
+
+class RefreshToken(Base):
+    __tablename__ = 'refresh_token'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    token_user: Mapped[UserProfile] = relationship(UserProfile,back_populates='token_user')
+    token: Mapped[str] = mapped_column(String)
+    created_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
 
 
 class Country(Base):
@@ -51,6 +67,9 @@ class Country(Base):
                                                 cascade='all, delete-orphan')
     hotel_id: Mapped[int] = mapped_column(ForeignKey("hotel.id"))
     hotel: Mapped["Hotel"] = relationship("Hotel", back_populates='countries')
+
+    def __repr__(self):
+        return f"{self.country_name}"
 
 class Hotel(Base):
     __tablename__ = 'hotel'
@@ -128,7 +147,9 @@ class Booking(Base):
     hotel: Mapped[Hotel] = relationship(Hotel, back_populates='bookings')
     room_id: Mapped[int] = mapped_column(ForeignKey("room.id"))
     room: Mapped[Room] = relationship(Room, back_populates='bookings')
-    created_date: Mapped[datetime] = mapped_column(Date, default=datetime.utcnow)
+    check_in: Mapped[date] = mapped_column(Date)
+    check_out: Mapped[date] = mapped_column(Date)
+    created_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
 
@@ -143,5 +164,5 @@ class Review(Base):
     hotel: Mapped[Hotel] = relationship(Hotel, back_populates='reviews')
     comment: Mapped[str] = mapped_column(Text)
     stars: Mapped[int] = mapped_column(Integer)
-    created_date: Mapped[datetime] = mapped_column(Date, default=datetime.utcnow)
+    created_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 

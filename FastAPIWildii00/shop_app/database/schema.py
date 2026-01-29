@@ -25,6 +25,9 @@ class UserProfileOutSchema(BaseModel):
     age: Optional[int]
     date_registered: date
 
+class UserLoginSchema(BaseModel):
+    username: str
+    password: str
 
 class CategoryInputSchema(BaseModel):
     category_name: str

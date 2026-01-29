@@ -25,6 +25,10 @@ class UserProfileOutSchema(BaseModel):
     age: Optional[int]
     date_registered: date
 
+class UserLoginSchema(BaseModel):
+    username: str
+    password: str
+
 
 class CountryInputSchema(BaseModel):
     country_name: str
@@ -112,13 +116,16 @@ class BookingInputSchema(BaseModel):
     user_id: int
     hotel_id: int
     room_id: int
-
+    check_in: date
+    check_out: date
 
 class BookingOutSchema(BaseModel):
     id: int
     user_id: int
     hotel_id: int
     room_id: int
+    check_in: date
+    check_out: date
 
 class ReviewInputSchema(BaseModel):
     user_id: int
